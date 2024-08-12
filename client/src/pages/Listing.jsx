@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import SwiperCore from 'swiper';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/bundle';
 import {
@@ -15,8 +15,8 @@ import {
   FaShare,
 } from 'react-icons/fa';
 import Contact from '../components/Contact';
-
-// https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
+import { addToCartStart, addToCartSuccess, addToCartFailure } from '../redux/cart/cartSlice';
+import { useNavigate } from 'react-router-dom';
 
 export default function Listing() {
   SwiperCore.use([Navigation]);
@@ -27,6 +27,28 @@ export default function Listing() {
   const [contact, setContact] = useState(false);
   const params = useParams();
   const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleAddToCart = () => {
+    dispatch(addToCartStart());
+
+    try {
+      const item = {
+        id: listing.id,
+        title: listing.name,
+        price: listing.offer ? listing.discountPrice : listing.regularPrice,
+        quantity: 1, // default quantity to 1, can be adjusted
+      };
+      dispatch(addToCartSuccess(item));
+
+    } catch (error) {
+      dispatch(addToCartFailure('Failed to add item to cart'));
+    }
+
+    navigate('/cart');
+    
+  };
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -58,9 +80,7 @@ export default function Listing() {
       )}
 
       {listing && !loading && !error && (
-
         <div>
-
           <Swiper navigation>
             {listing.imageUrls.map((url) => (
               <SwiperSlide key={url}>
@@ -70,16 +90,12 @@ export default function Listing() {
                     background: `url(${url}) center no-repeat`,
                     backgroundSize: 'cover',
                   }}
-
                 ></div>
-
               </SwiperSlide>
             ))}
-
           </Swiper>
 
           <div className='fixed top-[13%] right-[3%] z-10 border rounded-full w-12 h-12 flex justify-center items-center bg-slate-100 cursor-pointer'>
-
             <FaShare
               className='text-slate-500'
               onClick={() => {
@@ -90,7 +106,6 @@ export default function Listing() {
                 }, 2000);
               }}
             />
-
           </div>
 
           {copied && (
@@ -100,9 +115,7 @@ export default function Listing() {
           )}
 
           <div className='flex flex-col max-w-4xl mx-auto p-3 my-7 gap-4'>
-
             <p className='text-2xl font-semibold'>
-
               {listing.name} - INR{' '}
               {listing.offer
                 ? listing.discountPrice.toLocaleString('en-US')
@@ -110,13 +123,12 @@ export default function Listing() {
               {listing.type === 'rent' && ' / month'}
             </p>
 
-            <p className='flex items-center mt-6 gap-2 text-slate-600  text-sm'>
+            <p className='flex items-center mt-6 gap-2 text-slate-600 text-sm'>
               <FaMapMarkerAlt className='text-green-700' />
               {listing.address}
             </p>
 
             <div className='flex gap-4'>
-
               <p className='bg-red-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
                 {listing.type === 'rent' ? 'For Rent' : 'For Sale'}
               </p>
@@ -125,9 +137,7 @@ export default function Listing() {
                 <p className='bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
                   INR {+listing.regularPrice - +listing.discountPrice} OFF
                 </p>
-
               )}
-
             </div>
 
             <p className='text-slate-800'>
@@ -136,9 +146,7 @@ export default function Listing() {
             </p>
 
             <ul className='text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6'>
-
               <li className='flex items-center gap-1 whitespace-nowrap '>
-
                 <FaBed className='text-lg' />
                 {listing.bedrooms > 1
                   ? `${listing.bedrooms} beds `
@@ -161,7 +169,6 @@ export default function Listing() {
                 <FaChair className='text-lg' />
                 {listing.furnished ? 'Furnished' : 'Unfurnished'}
               </li>
-
             </ul>
 
             {currentUser && listing.userRef !== currentUser._id && !contact && (
@@ -173,8 +180,20 @@ export default function Listing() {
               </button>
             )}
 
+            {currentUser && listing.userRef !== currentUser._id && (
+              <>
+
+                <button
+                  className='bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3'
+                  onClick={handleAddToCart}
+                >
+                  Add to cart
+                </button>
+                
+              </>
+            )}
+
             {contact && <Contact listing={listing} />}
-            
           </div>
         </div>
       )}

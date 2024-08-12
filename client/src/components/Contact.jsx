@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate  } from 'react-router-dom';
+import Listing from '../pages/Listing';
 
 export default function Contact({ listing }) {
   const [landlord, setLandlord] = useState(null);
   const [message, setMessage] = useState('');
+
+
   const onChange = (e) => {
     setMessage(e.target.value);
   };
@@ -20,7 +23,8 @@ export default function Contact({ listing }) {
     };
     fetchLandlord();
   }, [listing.userRef]);
-  
+
+
   return (
     <>
       {landlord && (
@@ -46,6 +50,7 @@ export default function Contact({ listing }) {
           >
             Send Message          
           </Link>
+
         </div>
       )}
     </>
