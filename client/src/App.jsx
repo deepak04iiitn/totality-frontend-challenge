@@ -12,7 +12,7 @@ import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
 import Cart from './pages/Cart';
-import BookNow from './pages/BookNow';
+import BookNow from './pages/BookNow'; 
 
 export default function App() {
   return (
